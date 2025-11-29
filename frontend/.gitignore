@@ -1,0 +1,51 @@
+# -------------------------
+# Node modules
+# -------------------------
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# -------------------------
+# Build output
+# -------------------------
+dist/
+dist-ssr/
+*.local
+
+# -------------------------
+# Logs
+# -------------------------
+logs/
+*.log
+*.log.*
+log.txt
+
+# -------------------------
+# Environment variables
+# -------------------------
+.env
+.env.*
+!.env.example
+
+# -------------------------
+# Editor settings & cache
+# -------------------------
+.DS_Store
+.vscode/
+.idea/
+*.swp
+
+# -------------------------
+# ZIP files or export files
+# -------------------------
+*.zip
+src.zip
+
+# -------------------------
+# Misc cache
+# -------------------------
+.cache/
+.eslintcache
+.parcel-cache/
