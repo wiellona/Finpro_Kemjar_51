@@ -1,7 +1,9 @@
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { createContext, useMemo, useState } from "react";
-import Login from "./pages/Login";
-import Dashboard from "./pages/Dashboard";
+import Login from "./pages/Login.jsx";
+import Dashboard from "./pages/Dashboard.jsx";
+import AdminDashboard from "./pages/AdminDashboard.jsx";
+import UserDashboard from "./pages/UserDashboard.jsx";
 
 export const AuthContext = createContext(null);
 
@@ -17,11 +19,6 @@ const decodePayload = (jwt) => {
     console.warn("Failed to decode token payload", error);
     return null;
   }
-};
-
-const ProtectedRoute = ({ children }) => {
-  const token = localStorage.getItem("jwt");
-  return token ? children : <Navigate to="/login" replace />;
 };
 
 const App = () => {
@@ -56,21 +53,13 @@ const App = () => {
     <AuthContext.Provider value={contextValue}>
       <BrowserRouter>
         <Routes>
-          <Route
-            path="/login"
-            element={token ? <Navigate to="/dashboard" replace /> : <Login />}
-          />
-          <Route
-            path="/dashboard"
-            element={
-              <ProtectedRoute>
-                <Dashboard />
-              </ProtectedRoute>
-            }
-          />
+          <Route path="/login" element={<Login />} />
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/admin-dashboard" element={<AdminDashboard />} />
+          <Route path="/user-dashboard" element={<UserDashboard />} />
           <Route
             path="*"
-            element={<Navigate to={token ? "/dashboard" : "/login"} replace />}
+            element={<Navigate to={token ? "/dasshboard" : "/login"} replace />}
           />
         </Routes>
       </BrowserRouter>
