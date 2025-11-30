@@ -1,10 +1,7 @@
-const express = require("express");
-const {
-  searchUsers,
-  changeUserRole,
-} = require("../controllers/adminController");
-const { verifyToken } = require("../middleware/authMiddleware");
-const requireRole = require("../middleware/roleMiddleware");
+import express from "express";
+import { searchUsers, changeUserRole } from "../controllers/adminController.js";
+import { verifyToken } from "../middleware/authMiddleware.js";
+import requireRole from "../middleware/roleMiddleware.js";
 
 const router = express.Router();
 
@@ -12,4 +9,4 @@ router.use(verifyToken, requireRole("admin"));
 router.post("/search", searchUsers);
 router.post("/change-role", changeUserRole);
 
-module.exports = router;
+export default router;

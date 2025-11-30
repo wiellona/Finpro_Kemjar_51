@@ -1,7 +1,6 @@
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { createContext, useMemo, useState } from "react";
 import Login from "./pages/Login.jsx";
-import Dashboard from "./pages/Dashboard.jsx";
 import AdminDashboard from "./pages/AdminDashboard.jsx";
 import UserDashboard from "./pages/UserDashboard.jsx";
 
@@ -21,13 +20,30 @@ const decodePayload = (jwt) => {
   }
 };
 
+const ProtectedRoute = ({ children, requiredRole = null }) => {
+  const token = localStorage.getItem("jwt");
+  if (!token) {
+    return <Navigate to="/login" replace />;
+  }
+  
+  if (requiredRole) {
+    const profile = decodePayload(token);
+    if (profile?.role !== requiredRole) {
+      // Redirect to appropriate dashboard based on actual role
+      return <Navigate to={profile?.role === "admin" ? "/admin/dashboard" : "/dashboard"} replace />;
+    }
+  }
+  
+  return children;
+};
+
 const App = () => {
   const [token, setToken] = useState(() => localStorage.getItem("jwt") || "");
   const [profile, setProfile] = useState(() =>
     decodePayload(localStorage.getItem("jwt"))
   );
 
-  const handleLogin = (jwt) => {
+  const handleLogin = (jwt, role) => {
     localStorage.setItem("jwt", jwt);
     setToken(jwt);
     setProfile(decodePayload(jwt));
@@ -53,13 +69,33 @@ const App = () => {
     <AuthContext.Provider value={contextValue}>
       <BrowserRouter>
         <Routes>
-          <Route path="/login" element={<Login />} />
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/admin-dashboard" element={<AdminDashboard />} />
-          <Route path="/user-dashboard" element={<UserDashboard />} />
+          <Route
+            path="/login"
+            element={token ? <Navigate to={profile?.role === "admin" ? "/admin/dashboard" : "/dashboard"} replace /> : <Login />}
+          />
+          <Route
+            path="/dashboard"
+            element={
+              <ProtectedRoute requiredRole="user">
+                <UserDashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/dashboard"
+            element={
+              <ProtectedRoute requiredRole="admin">
+                <AdminDashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/"
+            element={<Navigate to={token ? (profile?.role === "admin" ? "/admin/dashboard" : "/dashboard") : "/login"} replace />}
+          />
           <Route
             path="*"
-            element={<Navigate to={token ? "/dasshboard" : "/login"} replace />}
+            element={<Navigate to={token ? (profile?.role === "admin" ? "/admin/dashboard" : "/dashboard") : "/login"} replace />}
           />
         </Routes>
       </BrowserRouter>

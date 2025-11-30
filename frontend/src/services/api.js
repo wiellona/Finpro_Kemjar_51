@@ -14,7 +14,9 @@ const handleResponse = async (response) => {
   return payload;
 };
 
-export const login = async ({ username, password }) => {
+// Login endpoint that accepts username, password, and expected role
+// Returns token and user info if role matches; otherwise throws error
+export const login = async ({ username, password, expectedRole }) => {
   const response = await fetch(`${API_BASE_URL}/auth/login`, {
     method: 'POST',
     headers: {
@@ -23,11 +25,19 @@ export const login = async ({ username, password }) => {
     body: JSON.stringify({ username, password }),
   });
 
-  return handleResponse(response);
+  const data = await handleResponse(response);
+  
+  // Validate that the user's actual role matches the expected role
+  if (expectedRole && data.user && data.user.role !== expectedRole) {
+    throw new Error(`User is not available in this login interface. Expected role: ${expectedRole}, but got: ${data.user.role}`);
+  }
+
+  return data;
 };
 
-export const fetchUsers = async (token) => {
-  const response = await fetch(`${API_BASE_URL}/users`, {
+// Get protected dashboard payload
+export const getDashboard = async (token) => {
+  const response = await fetch(`${API_BASE_URL}/dashboard`, {
     headers: {
       Authorization: `Bearer ${token}`,
     },
@@ -36,24 +46,27 @@ export const fetchUsers = async (token) => {
   return handleResponse(response);
 };
 
-export const changeUserRole = async ({ userId, role }, token) => {
-  const response = await fetch(`${API_BASE_URL}/admin/users/${userId}/role`, {
-    method: 'PATCH',
+export const changeUserRole = async ({ username, role }, token) => {
+  const response = await fetch(`${API_BASE_URL}/admin/change-role`, {
+    method: 'POST',
     headers: {
       'Content-Type': 'application/json',
       Authorization: `Bearer ${token}`,
     },
-    body: JSON.stringify({ role }),
+    body: JSON.stringify({ username, role }),
   });
 
   return handleResponse(response);
 };
 
 export const searchUsers = async (query, token) => {
-  const response = await fetch(`${API_BASE_URL}/admin/search?query=${encodeURIComponent(query)}`, {
+  const response = await fetch(`${API_BASE_URL}/admin/search`, {
+    method: 'POST',
     headers: {
+      'Content-Type': 'application/json',
       Authorization: `Bearer ${token}`,
     },
+    body: JSON.stringify({ keyword: query }),
   });
 
   return handleResponse(response);

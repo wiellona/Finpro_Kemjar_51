@@ -1,6 +1,6 @@
 import { useContext, useEffect, useMemo, useState } from "react";
 import { AuthContext } from "../App";
-import { fetchUsers, changeUserRole, searchUsers } from "../services/api";
+import { getDashboard, changeUserRole, searchUsers } from "../services/api";
 
 const AdminDashboard = () => {
     const { profile, token, logout } = useContext(AuthContext);
@@ -9,52 +9,51 @@ const AdminDashboard = () => {
     const [feedback, setFeedback] = useState("");
     const [searchQuery, setSearchQuery] = useState("");
     const [searchStatus, setSearchStatus] = useState("");
-    const [busyUserId, setBusyUserId] = useState(null);
+    const [busyUsername, setBusyUsername] = useState(null);
 
-    const username = profile?.username || profile?.sub || "Admin";
+    const username = profile?.username || "Admin";
 
     useEffect(() => {
         if (!token) return;
         let cancelled = false;
 
-        const loadUsers = async () => {
+        const loadDashboard = async () => {
             try {
-                const payload = await fetchUsers(token);
+                const payload = await getDashboard(token);
                 if (!cancelled) {
-                    setUsers(payload.users || []);
                     setFeedback("");
+                    setLoading(false);
                 }
             } catch (error) {
                 if (!cancelled) {
-                    setFeedback(error.message || "Unable to fetch users.");
-                }
-            } finally {
-                if (!cancelled) {
+                    setFeedback(error.message || "Unable to load dashboard.");
                     setLoading(false);
                 }
             }
         };
 
-        loadUsers();
+        loadDashboard();
         return () => {
             cancelled = true;
         };
     }, [token]);
 
-    const handleRoleUpdate = async (userId, nextRole) => {
-        setBusyUserId(userId);
+    const handleRoleUpdate = async (targetUsername, nextRole) => {
+        setBusyUsername(targetUsername);
         setFeedback("");
         try {
-            const updated = await changeUserRole({ userId, role: nextRole }, token);
+            const result = await changeUserRole({ username: targetUsername, role: nextRole }, token);
+            setFeedback(result.message || "Role updated successfully.");
+            // Update the user in the list
             setUsers((current) =>
                 current.map((user) =>
-                    user.id === userId ? { ...user, role: updated.role } : user
+                    user.username === targetUsername ? { ...user, role: nextRole } : user
                 )
             );
         } catch (error) {
             setFeedback(error.message || "Unable to change role.");
         } finally {
-            setBusyUserId(null);
+            setBusyUsername(null);
         }
     };
 
@@ -69,9 +68,9 @@ const AdminDashboard = () => {
         try {
             const result = await searchUsers(searchQuery, token);
             setSearchStatus(result.message || "Search completed.");
-            // Jika searchUsers mengembalikan data users, update state users
-            if (result.users) {
-                setUsers(result.users);
+            // Update users with search results
+            if (result.data && Array.isArray(result.data)) {
+                setUsers(result.data);
             }
         } catch (error) {
             setSearchStatus(error.message || "Search failed.");
@@ -113,13 +112,12 @@ const AdminDashboard = () => {
                 </section>
 
                 <section>
-                    <h3 style={styles.sectionTitle}>All Users ({filteredUsers.length})</h3>
+                    <h3 style={styles.sectionTitle}>User List ({filteredUsers.length})</h3>
                     <div style={styles.tableWrapper}>
                         <table style={styles.table}>
                             <thead>
                                 <tr>
                                     <th style={styles.th}>Username</th>
-                                    <th style={styles.th}>Email</th>
                                     <th style={styles.th}>Role</th>
                                     <th style={styles.th}>Actions</th>
                                 </tr>
@@ -127,27 +125,26 @@ const AdminDashboard = () => {
                             <tbody>
                                 {loading ? (
                                     <tr>
-                                        <td colSpan={4} style={styles.td}>Loading users…</td>
+                                        <td colSpan={3} style={styles.td}>Loading…</td>
                                     </tr>
                                 ) : filteredUsers.length === 0 ? (
                                     <tr>
-                                        <td colSpan={4} style={styles.td}>
+                                        <td colSpan={3} style={styles.td}>
                                             No users found.
                                         </td>
                                     </tr>
                                 ) : (
                                     filteredUsers.map((user) => (
-                                        <tr key={user.id}>
+                                        <tr key={user.id || user.username}>
                                             <td style={styles.td}>{user.username}</td>
-                                            <td style={styles.td}>{user.email}</td>
                                             <td style={styles.td}>{user.role}</td>
                                             <td style={styles.td}>
                                                 <select
                                                     value={user.role}
                                                     onChange={(event) =>
-                                                        handleRoleUpdate(user.id, event.target.value)
+                                                        handleRoleUpdate(user.username, event.target.value)
                                                     }
-                                                    disabled={busyUserId === user.id}
+                                                    disabled={busyUsername === user.username}
                                                     style={styles.select}
                                                 >
                                                     <option value="user">user</option>

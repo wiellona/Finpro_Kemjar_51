@@ -17,12 +17,13 @@ const Login = () => {
     setError("");
     setLoading(true);
     try {
+      const expectedRole = isAdminLogin ? "admin" : "user";
       const { token } = await loginRequest({ 
         username, 
         password,
-        role: isAdminLogin ? "admin" : "user" 
+        expectedRole
       });
-      login(token, isAdminLogin ? "admin" : "user");
+      login(token, expectedRole);
       navigate(isAdminLogin ? "/admin/dashboard" : "/dashboard", { replace: true });
     } catch (err) {
       setError(err.message || "Unable to login.");

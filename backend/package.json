@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "Intentionally vulnerable API for JWT and SQLi demonstrations",
   "main": "server.js",
+  "type": "module",
   "scripts": {
     "start": "node server.js"
   },

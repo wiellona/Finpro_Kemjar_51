@@ -1,5 +1,5 @@
-const { Pool } = require("pg");
-require("dotenv").config();
+import { Pool } from "pg";
+import "dotenv/config";
 
 if (!process.env.DATABASE_URL) {
   throw new Error("DATABASE_URL is not defined. Please check your .env file.");
@@ -22,4 +22,4 @@ pool.on("error", (err) => {
   process.exit(-1);
 });
 
-module.exports = pool;
+export default pool;

@@ -1,8 +1,8 @@
-const express = require("express");
-const { runSeed } = require("../controllers/setupController");
+import express from "express";
+import { runSeed } from "../controllers/setupController.js";
 
 const router = express.Router();
 
 router.get("/setup", runSeed);
 
-module.exports = router;
+export default router;
