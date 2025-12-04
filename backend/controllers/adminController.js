@@ -11,21 +11,12 @@ export const searchUsers = async (req, res) => {
 
     // BLIND SQLi: Kita sembunyikan data aslinya.
     // Penyerang harus menebak data berdasarkan respon "Found" atau "Not Found".
-    if (!rows || rows.length === 0) {
-      return res.json({ 
-          message: "No user found.", 
-          found: false 
-      });
+    if (!rows.length) {
+      return res.json({ message: "No user found." });
     }
 
-    return res.json({ 
-        message: "User found in database.", 
-        found: true 
-        // Perhatikan: Kita TIDAK mengirimkan 'rows' (data user) ke frontend
-    });
-
+    return res.json({ message: "User(s) found.", data: rows });
   } catch (err) {
-    // Error handling standar, jangan tampilkan error SQL detail ke user agar lebih menantang
     console.error("Search error:", err);
     return res.status(500).json({ message: "Unable to search users right now." });
   }
