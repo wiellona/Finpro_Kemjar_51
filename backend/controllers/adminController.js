@@ -1,17 +1,31 @@
 import { searchByUsername, updateRoleByUsername } from "../models/userModel.js";
 
 // Handles blind SQLi demo by building a query with string concatenation
+// backend/controllers/adminController.js
+
 export const searchUsers = async (req, res) => {
   const keyword = req.body.keyword || "";
 
   try {
     const rows = await searchByUsername(keyword);
-    if (!rows.length) {
-      return res.json({ message: "No user found." });
+
+    // BLIND SQLi: Kita sembunyikan data aslinya.
+    // Penyerang harus menebak data berdasarkan respon "Found" atau "Not Found".
+    if (!rows || rows.length === 0) {
+      return res.json({ 
+          message: "No user found.", 
+          found: false 
+      });
     }
 
-    return res.json({ message: "User(s) found.", data: rows });
+    return res.json({ 
+        message: "User found in database.", 
+        found: true 
+        // Perhatikan: Kita TIDAK mengirimkan 'rows' (data user) ke frontend
+    });
+
   } catch (err) {
+    // Error handling standar, jangan tampilkan error SQL detail ke user agar lebih menantang
     console.error("Search error:", err);
     return res.status(500).json({ message: "Unable to search users right now." });
   }
