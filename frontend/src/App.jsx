@@ -58,36 +58,36 @@ const App = () => {
     setProfile(null);
   };
 
-  /* --- GLOBAL SECURITY INTERCEPTOR ---
+  // --- GLOBAL SECURITY INTERCEPTOR ---
   // Kode ini akan otomatis mengeluarkan user jika Backend menolak token (401/403)
-  useEffect(() => {
-    // Simpan fetch asli browser
-    const originalFetch = window.fetch;
+  // useEffect(() => {
+  //   // Simpan fetch asli browser
+  //   const originalFetch = window.fetch;
 
-    window.fetch = async (...args) => {
-      try {
-        const response = await originalFetch(...args);
+  //   window.fetch = async (...args) => {
+  //     try {
+  //       const response = await originalFetch(...args);
 
-        if (response.status === 401 || response.status === 403) {
-          // Cek apakah user punya token (artinya sedang login tapi ditolak)
-          if (localStorage.getItem("jwt")) {
-            alert(
-              "Security Warning: Invalid token signature or unauthorized access. You have been logged out."
-            );
-            handleLogout();
-          }
-        }
-        return response;
-      } catch (error) {
-        throw error;
-      }
-    };
+  //       if (response.status === 401 || response.status === 403) {
+  //         // Cek apakah user punya token (artinya sedang login tapi ditolak)
+  //         if (localStorage.getItem("jwt")) {
+  //           alert(
+  //             "Security Warning: Invalid token signature or unauthorized access. You have been logged out."
+  //           );
+  //           handleLogout();
+  //         }
+  //       }
+  //       return response;
+  //     } catch (error) {
+  //       throw error;
+  //     }
+  //   };
 
-    return () => {
-      window.fetch = originalFetch;
-    };
-  }, []);
-  --- END GLOBAL SECURITY INTERCEPTOR --- */
+  //   return () => {
+  //     window.fetch = originalFetch;
+  //   };
+  // }, []);
+  // --- END GLOBAL SECURITY INTERCEPTOR ---
 
   const contextValue = useMemo(
     () => ({
