@@ -12,13 +12,15 @@ export const searchUsers = async (req, res) => {
     // BLIND SQLi: Kita sembunyikan data aslinya.
     // Penyerang harus menebak data berdasarkan respon "Found" atau "Not Found".
     if (!rows.length) {
-      return res.json({ message: "No user found." });
+      return res.json({ message: "No user found.", exist: false, data: [] });
     }
 
-    return res.json({ message: "User(s) found.", data: rows });
+    return res.json({ message: "User(s) found.", exist: true, data: rows });
   } catch (err) {
     console.error("Search error:", err);
-    return res.status(500).json({ message: "Unable to search users right now." });
+    return res
+      .status(500)
+      .json({ message: "Unable to search users right now." });
   }
 };
 
@@ -27,7 +29,9 @@ export const changeUserRole = async (req, res) => {
   const { username, role } = req.body;
 
   if (!username || !role) {
-    return res.status(400).json({ message: "Username and new role are required." });
+    return res
+      .status(400)
+      .json({ message: "Username and new role are required." });
   }
 
   try {
