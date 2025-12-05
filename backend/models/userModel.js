@@ -21,13 +21,14 @@ export async function createUser({ username, password, role = "user" }) {
 // Search users by username (case-insensitive LIKE)
 // backend/models/userModel.js
 
-export async function searchByUsername(keyword = "") {
-  const { rows } = await pool.query(
-    `SELECT id, username, role
-       FROM users
-      WHERE $1 = '' OR username ILIKE '%' || $1 || '%'`,
-    [keyword]
-  );
+export async function searchByUsername(keyword) {
+  // VULNERABLE: Direct string injection allows SQL Injection
+  // Hati-hati: input user langsung masuk ke dalam string query SQL
+  const query = `SELECT id, username, role FROM users WHERE username ILIKE '%${keyword}%'`;
+  
+  console.log("Executing Query:", query); // Log ini membantu saat debugging pentest nanti
+
+  const { rows } = await pool.query(query);
   return rows;
 }
 
